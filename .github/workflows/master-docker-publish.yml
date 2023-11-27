@@ -1,0 +1,83 @@
+name: Docker Image CI/CD
+env:
+  IMAGE_NAME: github/ruby-project
+on:
+  push:
+    branches: [ "master" ]
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker
+    runs-on: ip-172-31-24-117
+    steps:
+    - name: Check out the repo
+      uses: actions/checkout@v4
+    
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.IMAGE_NAME }}
+
+    - name: Get old image id
+      run: |
+        result=$( docker images -q ${{steps.meta.outputs.tags}} )
+        echo "OLD_IMAGE_ID=${result}" >> $GITHUB_ENV
+         
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      id: dockerbuild
+      with:
+        context: .
+        file: ./Dockerfile
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Outputs
+      run: |
+        echo "new: ${{ steps.docker_build.outputs.imageid }} old: ${{ env.OLD_IMAGE_ID }}"
+      
+    outputs:
+     NEW_IMAGE_ID: ${{ steps.dockerbuild.outputs.imageid }}
+     OLD_IMAGE_ID: ${{ env.OLD_IMAGE_ID }}
+     
+  update-create-container:
+    needs: push_to_registry
+    name: Update/Create container with new image and run it
+    runs-on: ip-172-31-24-117
+    steps:
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v7
+
+      - name: Set conatiner name variable
+        run: |
+          echo "CONTAINER_NAME=${{ env.IMAGE_NAME }}/${{steps.branch-name.outputs.current_branch}}" | tr "/" "-" >> $GITHUB_ENV
+
+      - name: Check if container exists
+        run: |
+              result=$( docker ps -a -q -f name=${{ env.CONTAINER_NAME }} )
+              if [[ -n "$result" ]]; then
+                  echo "container_exist=true" >> $GITHUB_ENV
+              else
+                  echo "container_exist=false" >> $GITHUB_ENV
+              fi
+              
+      - name: Stop existing docker conatiner 
+        if: ${{ env.container_exist == 'true' }}
+        run: |
+          docker stop ${{ env.CONTAINER_NAME }}
+
+      - name: Remove existing docker container
+        if: ${{ env.container_exist == 'true' }}
+        run: |
+          docker rm ${{ env.CONTAINER_NAME }}
+      
+      - name: Run new container
+        run: |
+          docker run -p 0.0.0.0:3000:80/tcp --name ${{ env.CONTAINER_NAME }} -d ${{ needs.push_to_registry.outputs.NEW_IMAGE_ID }}
+
+      - name: Remove old image
+        if: ${{ needs.push_to_registry.outputs.OLD_IMAGE_ID != '' }}
+        run: |
+          docker rmi ${{ needs.push_to_registry.outputs.OLD_IMAGE_ID }}
+      
