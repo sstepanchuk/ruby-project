@@ -82,6 +82,9 @@ jobs:
     if: ${{ always() }}
     steps: 
       #success
+      - name: Output
+        run: |
+          echo "${{ toJSON(needs) }}"
       
       - name: Remove existing docker container
         if: ${{ needs['update-create-container'].status == 'success' }}
