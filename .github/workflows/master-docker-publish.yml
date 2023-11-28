@@ -43,11 +43,6 @@ jobs:
     name: Push Docker image to Docker
     runs-on: ip-172-31-24-117
     steps:
-
-    - name: Output
-      run: |
-        echo "${{ toJson(needs) }}"
-        asdasdsadasd
     
     - name: Check out the repo
       uses: actions/checkout@v4
