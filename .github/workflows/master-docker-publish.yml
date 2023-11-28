@@ -41,6 +41,7 @@ jobs:
      OLD_IMAGE_ID: ${{ env.OLD_IMAGE_ID }}
      CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
      OLD_CONTAINER_ID: ${{ env.OLD_CONTAINER_ID }}
+     DOCKER_META_OUTPUTS: ${{ steps.meta.outputs }}
      
   push_to_registry:
     needs: state
@@ -62,8 +63,8 @@ jobs:
       with:
         context: .
         file: ./Dockerfile
-        tags: ${{ needs.state.steps.meta.outputs.tags }}
-        labels: ${{ needs.state.steps.meta.outputs.labels }}
+        tags: ${{ needs.state.outputs.DOCKER_META_OUTPUTS.tags }}
+        labels: ${{ needs.state.outputs.DOCKER_META_OUTPUTS.labels }}
 
     outputs:
      NEW_IMAGE_ID: ${{ steps.dockerbuild.outputs.imageid }}
