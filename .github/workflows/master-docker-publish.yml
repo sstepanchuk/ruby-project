@@ -88,7 +88,7 @@ jobs:
       #success
 
       - name: Remove existing docker container
-        if: ${{ needs.update-create-container.result == 'success' }}
+        if: ${{ needs.update-create-container.result == 'success' && needs.state.outputs.CONTAINER_NAME != '' }}
         run: |
           docker rm ${{ needs.state.outputs.CONTAINER_NAME }}
     
