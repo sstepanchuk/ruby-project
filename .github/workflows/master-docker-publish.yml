@@ -18,7 +18,7 @@ jobs:
 
       - name: Get old image id
         run: |
-          result=$( docker images -q ${{steps.meta.outputs.tags}} )
+          result=$( docker images -q ${{ steps.meta.outputs.tags }} )
           echo "OLD_IMAGE_ID=${result}" >> $GITHUB_ENV
 
       - name: Get branch name
@@ -31,7 +31,7 @@ jobs:
 
       - name: Check if container exists
         run: |
-          result=$( docker ps -a -q -f name=${{ needs.state.outputs.CONTAINER_NAME }} )
+          result=$( docker ps -a -q -f name=${{ env.CONTAINER_NAME }} )
           echo "OLD_CONTAINER_ID=${result}" >> $GITHUB_ENV
         
     outputs:
@@ -44,6 +44,10 @@ jobs:
     name: Push Docker image to Docker
     runs-on: ip-172-31-24-117
     steps:
+
+    - name: Output
+      run: |
+        echo "${{ toJson(needs.state.steps.meta.outputs) }}"
     
     - name: Check out the repo
       uses: actions/checkout@v4
