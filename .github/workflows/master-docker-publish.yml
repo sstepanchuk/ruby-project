@@ -55,6 +55,10 @@ jobs:
         tags: ${{ needs.state.steps.meta.outputs.tags }}
         labels: ${{ needs.state.steps.meta.outputs.labels }}
 
+    - name: Output
+      run: |
+        asdasdasdasdasdasd
+
     outputs:
      NEW_IMAGE_ID: ${{ steps.dockerbuild.outputs.imageid }}
 
@@ -82,10 +86,7 @@ jobs:
     if: ${{ always() }}
     steps: 
       #success
-      - name: Output
-        run: |
-          echo "${{ toJSON(needs) }}"
-      
+
       - name: Remove existing docker container
         if: ${{ needs.update-create-container.result == 'success' }}
         run: |
