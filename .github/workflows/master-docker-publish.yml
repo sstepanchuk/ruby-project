@@ -84,35 +84,35 @@ jobs:
       #success
       
       - name: Remove existing docker container
-        if: ${{ needs.update-create-container.status == 'success' }}
+        if: ${{ needs['update-create-container'].status == 'success' }}
         run: |
           docker rm ${{ needs.state.outputs.CONTAINER_NAME }}
     
       - name: Rename new docker container
-        if: ${{ needs.update-create-container.status == 'success' }}
+        if: ${{ needs['update-create-container'].status == 'success' }}
         run: |
           docker rename ${{ needs.state.outputs.CONTAINER_NAME }}-new ${{ needs.state.outputs.CONTAINER_NAME }}
 
       - name: Remove old image
-        if: ${{ (needs.update-create-container.status == 'success' && needs.push_to_registry.status == 'success') && needs.state.outputs.OLD_IMAGE_ID != '' }}
+        if: ${{ (needs['update-create-container'].status == 'success' && needs.push_to_registry.status == 'success') && needs.state.outputs.OLD_IMAGE_ID != '' }}
         run: |
           docker rmi ${{ needs.state.outputs.OLD_IMAGE_ID }}
 
       #failed
       
       - name: Remove new broken container
-        if: ${{ needs.update-create-container.status != 'success' && needs.update-create-container.outputs.NEW_CONTAINER_ID != '' }}
+        if: ${{ needs['update-create-container'].status != 'success' && needs['update-create-container'].outputs.NEW_CONTAINER_ID != '' }}
         run: |
-          docker stop ${{ needs.update-create-container.outputs.NEW_CONTAINER_ID }}
-          docker rm ${{ needs.update-create-container.outputs.NEW_CONTAINER_ID }}
+          docker stop ${{ needs['update-create-container'].outputs.NEW_CONTAINER_ID }}
+          docker rm ${{ needs['update-create-container'].outputs.NEW_CONTAINER_ID }}
 
       - name: Start old container
-        if: ${{ needs.update-create-container.status != 'success' && needs.state.outputs.OLD_CONTAINER_ID != '' }}
+        if: ${{ needs['update-create-container'].status != 'success' && needs.state.outputs.OLD_CONTAINER_ID != '' }}
         run: |
           docker start ${{ needs.state.outputs.OLD_CONTAINER_ID }}
 
       - name: Remove new broken image
-        if: ${{ (needs.update-create-container.status != 'success' || needs.push_to_registry.status != 'success') && needs.push_to_registry.outputs.NEW_IMAGE_ID != '' }}
+        if: ${{ (needs['update-create-container'].status != 'success' || needs.push_to_registry.status != 'success') && needs.push_to_registry.outputs.NEW_IMAGE_ID != '' }}
         run: |
           docker rmi ${{ needs.push_to_registry.outputs.NEW_IMAGE_ID }}
 
