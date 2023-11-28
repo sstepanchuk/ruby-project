@@ -93,7 +93,7 @@ jobs:
           docker rm ${{ needs.state.outputs.CONTAINER_NAME }}
     
       - name: Rename new docker container
-        if: ${{ needs.update-create-container.result == 'success' }}
+        if: ${{ needs.update-create-container.result == 'success' && needs.update-create-container.outputs.NEW_CONTAINER_ID != '' }}
         run: |
           docker rename ${{ needs.state.outputs.CONTAINER_NAME }}-new ${{ needs.state.outputs.CONTAINER_NAME }}
 
