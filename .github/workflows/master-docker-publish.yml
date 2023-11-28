@@ -10,6 +10,9 @@ jobs:
     runs-on: ip-172-31-24-117
     steps:
 
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
@@ -44,10 +47,6 @@ jobs:
     name: Push Docker image to Docker
     runs-on: ip-172-31-24-117
     steps:
-
-    - name: Output
-      run: |
-        echo "${{ toJson(needs.state.steps.meta.outputs) }}"
     
     - name: Check out the repo
       uses: actions/checkout@v4
