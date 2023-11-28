@@ -9,6 +9,7 @@ jobs:
     name: Init state variables
     runs-on: ip-172-31-24-117
     steps:
+      
       - name: Get old image id
         run: |
           result=$( docker images -q ${{steps.meta.outputs.tags}} )
@@ -45,6 +46,10 @@ jobs:
     env:
       dockermeta: ${{ needs.state.steps.meta.outputs }}
     steps:
+    - name: Output
+      run: |
+        echo "${{ toJson(env.dockermeta) }}"
+    
     - name: Check out the repo
       uses: actions/checkout@v4
 
