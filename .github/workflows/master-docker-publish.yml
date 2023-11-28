@@ -57,10 +57,6 @@ jobs:
         tags: ${{ needs.state.steps.meta.outputs.tags }}
         labels: ${{ needs.state.steps.meta.outputs.labels }}
 
-    - name: Output
-      run: |
-        asdasdasdasdasdasd
-
     outputs:
      NEW_IMAGE_ID: ${{ steps.dockerbuild.outputs.imageid }}
 
@@ -79,6 +75,11 @@ jobs:
         run: |
           result=$( docker run -i -p 0.0.0.0:80:3000/tcp --restart unless-stopped --name ${{ needs.state.outputs.CONTAINER_NAME }}-new -d ${{ needs.push_to_registry.outputs.NEW_IMAGE_ID }} )
           echo "NEW_CONTAINER_ID=${result}" >> $GITHUB_ENV
+
+      - name: Output
+        run: |
+          asdasdasdasdasdasd
+          
     outputs:
       NEW_CONTAINER_ID: ${{ env.NEW_CONTAINER_ID }}  
 
