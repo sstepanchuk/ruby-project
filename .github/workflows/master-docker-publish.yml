@@ -9,7 +9,13 @@ jobs:
     name: Init state variables
     runs-on: ip-172-31-24-117
     steps:
-      
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+
       - name: Get old image id
         run: |
           result=$( docker images -q ${{steps.meta.outputs.tags}} )
@@ -18,13 +24,7 @@ jobs:
       - name: Get branch name
         id: branch-name
         uses: tj-actions/branch-names@v7
-
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE_NAME }}
-
+          
       - name: Set base container name variable
         run: |
           echo "CONTAINER_NAME=${{ env.IMAGE_NAME }}/${{steps.branch-name.outputs.current_branch}}" | tr "/" "-" >> $GITHUB_ENV
@@ -46,6 +46,7 @@ jobs:
     env:
       dockermeta: ${{ needs.state.steps.meta.outputs }}
     steps:
+
     - name: Output
       run: |
         echo "${{ toJson(env.dockermeta) }}"
@@ -74,6 +75,7 @@ jobs:
     name: Update/Create container with new image and run it
     runs-on: ip-172-31-24-117
     steps: 
+
       - name: Stop existing docker conatiner 
         if: ${{ needs.state.outputs.OLD_CONTAINER_ID != '' }}
         run: |
