@@ -42,6 +42,8 @@ jobs:
     needs: state
     name: Push Docker image to Docker
     runs-on: ip-172-31-24-117
+    env:
+      dockermeta: ${{ needs.state.steps.meta }}
     steps:
     - name: Check out the repo
       uses: actions/checkout@v4
@@ -52,8 +54,8 @@ jobs:
       with:
         context: .
         file: ./Dockerfile
-        tags: ${{ needs.state.steps.meta.outputs.tags }}
-        labels: ${{ needs.state.steps.meta.outputs.labels }}
+        tags: ${{ dockermeta.outputs.tags }}
+        labels: ${{ dockermeta.outputs.labels }}
 
     - name: Output
       run: |
