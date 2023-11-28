@@ -35,7 +35,7 @@ jobs:
         
     outputs:
      OLD_IMAGE_ID: ${{ env.OLD_IMAGE_ID }}
-     CONTAINER_NAME: ${{ needs.state.outputs.CONTAINER_NAME }}
+     CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
      OLD_CONTAINER_ID: ${{ env.OLD_CONTAINER_ID }}
      
   push_to_registry:
