@@ -10,27 +10,22 @@ jobs:
     runs-on: ip-172-31-24-117
     steps:
 
-      - name: Check out the repo
-        uses: actions/checkout@v4
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v7
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE_NAME }}
+      - name: Set docker tag
+        run: |
+          echo "DOCKER_TAG=${{ env.IMAGE_NAME }}:${{ steps.branch-name.outputs.current_branch }}" >> $GITHUB_ENV
 
       - name: Get old image id
         run: |
           result=$( docker images -q ${{ steps.meta.outputs.tags }} )
           echo "OLD_IMAGE_ID=${result}" >> $GITHUB_ENV
-
-      - name: Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v7
           
       - name: Set base container name variable
         run: |
-          echo "CONTAINER_NAME=${{ env.IMAGE_NAME }}/${{steps.branch-name.outputs.current_branch}}" | tr "/" "-" >> $GITHUB_ENV
+          echo "CONTAINER_NAME=${{ env.IMAGE_NAME }}-${{ steps.branch-name.outputs.current_branch }}" | tr "/" "-" >> $GITHUB_ENV
 
       - name: Check if container exists
         run: |
@@ -41,7 +36,7 @@ jobs:
      OLD_IMAGE_ID: ${{ env.OLD_IMAGE_ID }}
      CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
      OLD_CONTAINER_ID: ${{ env.OLD_CONTAINER_ID }}
-     DOCKER_META_OUTPUTS: ${{ steps.meta.outputs }}
+     DOCKER_TAG: ${{ env.DOCKER_TAG }}
      
   push_to_registry:
     needs: state
@@ -63,8 +58,7 @@ jobs:
       with:
         context: .
         file: ./Dockerfile
-        tags: ${{ needs.state.outputs.DOCKER_META_OUTPUTS.tags }}
-        labels: ${{ needs.state.outputs.DOCKER_META_OUTPUTS.labels }}
+        tags: ${{ needs.state.outputs.DOCKER_TAG }}
 
     outputs:
      NEW_IMAGE_ID: ${{ steps.dockerbuild.outputs.imageid }}
