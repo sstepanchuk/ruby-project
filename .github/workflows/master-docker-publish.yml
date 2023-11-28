@@ -30,12 +30,12 @@ jobs:
 
       - name: Check if container exists
         run: |
-          result=$( docker ps -a -q -f name=${{ env.CONTAINER_NAME }} )
+          result=$( docker ps -a -q -f name=${{ needs.state.outputs.CONTAINER_NAME }} )
           echo "OLD_CONTAINER_ID=${result}" >> $GITHUB_ENV
         
     outputs:
      OLD_IMAGE_ID: ${{ env.OLD_IMAGE_ID }}
-     CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
+     CONTAINER_NAME: ${{ needs.state.outputs.CONTAINER_NAME }}
      OLD_CONTAINER_ID: ${{ env.OLD_CONTAINER_ID }}
      
   push_to_registry:
@@ -86,12 +86,12 @@ jobs:
       - name: Remove existing docker container
         if: ${{ needs.update-create-container.status == 'success' }}
         run: |
-          docker rm ${{ env.CONTAINER_NAME }}
+          docker rm ${{ needs.state.outputs.CONTAINER_NAME }}
     
       - name: Rename new docker container
         if: ${{ needs.update-create-container.status == 'success' }}
         run: |
-          docker rename ${{ env.CONTAINER_NAME }}-new ${{ env.CONTAINER_NAME }}
+          docker rename ${{ needs.state.outputs.CONTAINER_NAME }}-new ${{ needs.state.outputs.CONTAINER_NAME }}
 
       - name: Remove old image
         if: ${{ (needs.update-create-container.status == 'success' && needs.push_to_registry.status == 'success') && needs.state.outputs.OLD_IMAGE_ID != '' }}
@@ -107,7 +107,7 @@ jobs:
           docker rm ${{ needs.update-create-container.outputs.NEW_CONTAINER_ID }}
 
       - name: Start old container
-        if: ${{ needs.update-create-container.status != 'success' }}
+        if: ${{ needs.update-create-container.status != 'success' && needs.state.outputs.OLD_CONTAINER_ID != '' }}
         run: |
           docker start ${{ needs.state.outputs.OLD_CONTAINER_ID }}
 
