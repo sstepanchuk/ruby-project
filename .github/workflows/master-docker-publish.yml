@@ -43,13 +43,7 @@ jobs:
     needs: state
     name: Push Docker image to Docker
     runs-on: ip-172-31-24-117
-    env:
-      dockermeta: ${{ needs.state.steps.meta.outputs }}
     steps:
-
-    - name: Output
-      run: |
-        echo "${{ toJson(env.dockermeta) }}"
     
     - name: Check out the repo
       uses: actions/checkout@v4
@@ -60,8 +54,8 @@ jobs:
       with:
         context: .
         file: ./Dockerfile
-        tags: ${{ env.dockermeta.tags }}
-        labels: ${{ env.dockermeta.labels }}
+        tags: ${{ needs.state.steps.meta.outputs.tags }}
+        labels: ${{ needs.state.steps.meta.outputs.labels }}
 
     - name: Output
       run: |
