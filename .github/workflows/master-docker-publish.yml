@@ -74,7 +74,7 @@ jobs:
       
       - name: Run new container
         run: |
-          docker run -i -p 0.0.0.0:3000:80/tcp --restart unless-stopped --name ${{ env.CONTAINER_NAME }} -d ${{ needs.push_to_registry.outputs.NEW_IMAGE_ID }}
+          docker run -i -p 0.0.0.0:80:3000/tcp --restart unless-stopped --name ${{ env.CONTAINER_NAME }} -d ${{ needs.push_to_registry.outputs.NEW_IMAGE_ID }}
 
       - name: Remove old image
         if: ${{ needs.push_to_registry.outputs.OLD_IMAGE_ID != '' }}
